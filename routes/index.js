@@ -28,19 +28,22 @@ router.get('/', function(req, res, next) {
 });
 
 
-router.post('/upload',upload.single('image'),async(req, res)=> {
+router.post('/upload',async(req, res)=> {
 
-  const result = await cloudinary.uploader.upload(req.file.path);
+  const file=req.files.image
+  let imagePath
+  await cloudinary.uploader.upload(file.tempFilePath,{folder:"Products"},(error,result)=>{
+      imagePath=result.secure_url;
+      public_id=result.public_id
+  });
 
       const data= new Cloud({
         name:req.body.name,
-        image:result.secure_url,
-        cloud_id:result.public_id
+        image:imagePath,
+        cloud_id:public_id
       })
       await data.save();
       res.send('successfully')
-
-    console.log(result)
 });
 
 module.exports = router;
